@@ -1,6 +1,6 @@
 # Ailfred: Your Personal DeFi Butler on Base
 
-![Ailfred Logo](public/assets/banner.jpeg)
+![Ailfred Logo](public/assets/banner.png)
 
 Ailfred is a sophisticated AI agent that serves as your personal DeFi butler on the Base network. With a polite, butler-like demeanor, Ailfred helps you navigate the complexities of DeFi with elegance and precision.
 

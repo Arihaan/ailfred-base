@@ -30,8 +30,16 @@ export interface PortfolioPosition {
 
 export interface UserPortfolio {
   riskProfile: RiskProfile;
-  positions: PortfolioPosition[];
+  positions: Position[];
   totalValue: number;
+}
+
+export interface Position {
+  protocol: string;
+  type: string;
+  asset: string;
+  amount: number;
+  details: Record<string, unknown>;
 }
 
 export interface AavePosition {
@@ -43,17 +51,11 @@ export interface AavePosition {
 }
 
 export interface Strategy {
-  id: string;
   name: string;
   description: string;
-  riskLevel: 'low' | 'medium' | 'high';
-  protocol: string;
-  expectedApy: string;
-  isAvailable: boolean;
-  requirements?: {
-    minimumAmount?: number;
-    token?: string;
-  };
+  riskLevel: string;
+  expectedReturn: string;
+  requirements: string[];
 }
 
 export interface Message {
@@ -72,28 +74,42 @@ export interface ChatState {
 
 // Update the ExtendedCdpWalletProvider interface
 export type ExtendedCdpWalletProvider = CdpWalletProvider & {
-  networkId: string;
-  defaultAddress: {
-    addressId: string;
-  };
   getAddress(): string;
   getBalance(): Promise<bigint>;
-  readContract(params: {
-    address: `0x${string}`;
-    abi: any[];
-    functionName: string;
-    args: any[];
-  }): Promise<any>;
-  invokeContract(params: {
-    contractAddress: string;
-    method: string;
-    args: Record<string, unknown>;
-    amount?: number;
-    assetId?: string;
-  }): Promise<{
-    wait(): Promise<void>;
-  }>;
-  exportWallet(): Promise<string>;
+  readContract(params: ContractParams): Promise<unknown>;
+  sendTransaction(params: TransactionParams): Promise<string>;
+  waitForTransactionReceipt(hash: string): Promise<TransactionReceipt | null>;
+  networkId: string;
+};
+
+interface ContractParams {
+  address: `0x${string}`;
+  abi: ContractFunction[];
+  functionName: string;
+  args: unknown[];
+}
+
+interface ContractFunction {
+  inputs: FunctionParameter[];
+  name: string;
+  outputs: FunctionParameter[];
+  stateMutability: string;
+  type: string;
+}
+
+interface FunctionParameter {
+  name?: string;
+  type: string;
+}
+
+interface TransactionParams {
+  to: `0x${string}`;
+  value?: bigint;
+  data?: `0x${string}`;
+}
+
+interface TransactionReceipt {
+  status: number;
 }
 
 // Protocol Types

@@ -1,12 +1,11 @@
 import { Message } from '../../lib/agent/types';
 import StrategyCard from './StrategyCard';
 
-export interface ChatMessageProps {
+interface ChatMessageProps {
   message: Message;
-  isLastMessage?: boolean;
 }
 
-export default function ChatMessage({ message, isLastMessage = false }: ChatMessageProps) {
+export default function ChatMessage({ message }: ChatMessageProps) {
   const isAssistant = message.role === 'assistant';
   const bubbleColor = isAssistant ? 'bg-neutral-900' : 'bg-blue-600';
 

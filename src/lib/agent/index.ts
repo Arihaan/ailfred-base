@@ -59,18 +59,24 @@ interface AgentConfig {
   }[];
 }
 
+interface AgentCallbacks {
+  handleLLMStart: () => Promise<void>;
+  handleLLMEnd: () => Promise<void>;
+  handleLLMError: (err: Error) => Promise<void>;
+}
+
 export class AilfredAgent {
   private walletProvider: ExtendedCdpWalletProvider;
-  private agent: any;
+  private agent: ReturnType<typeof createReactAgent>;
   private memory: MemorySaver;
-  private agentConfig: any;
+  private agentConfig: { configurable: { thread_id: string } };
   private userProfile: RiskProfile | null = null;
 
   private constructor(
     walletProvider: ExtendedCdpWalletProvider,
-    agent: any,
+    agent: ReturnType<typeof createReactAgent>,
     memory: MemorySaver,
-    agentConfig: any
+    agentConfig: { configurable: { thread_id: string } }
   ) {
     this.walletProvider = walletProvider;
     this.agent = agent;

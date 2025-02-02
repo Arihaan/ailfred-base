@@ -51,11 +51,17 @@ export interface AavePosition {
 }
 
 export interface Strategy {
+  id: string;
   name: string;
   description: string;
-  riskLevel: string;
-  expectedReturn: string;
-  requirements: string[];
+  riskLevel: 'low' | 'medium' | 'high';
+  protocol: string;
+  expectedApy: string;
+  isAvailable: boolean;
+  requirements?: {
+    minimumAmount?: number;
+    token?: string;
+  };
 }
 
 export interface Message {

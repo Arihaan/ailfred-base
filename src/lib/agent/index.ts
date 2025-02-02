@@ -13,14 +13,12 @@ import { HumanMessage } from "@langchain/core/messages";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
-import { BigNumberish, ethers } from "ethers";
-import { PROTOCOL_CONSTANTS, COMMON_TOKENS, AILFRED_PERSONALITY, AAVE_CONSTANTS } from "./constants";
+import { COMMON_TOKENS, AILFRED_PERSONALITY, AAVE_CONSTANTS } from "./constants";
 import type { 
   Message, 
   RiskProfile, 
   Strategy, 
-  UserPortfolio, 
-  Network,
+  UserPortfolio,
   ExtendedCdpWalletProvider 
 } from "./types";
 import { ReadContractParameters, ReadContractReturnType } from "viem";
@@ -84,7 +82,7 @@ export class AilfredAgent {
     this.agentConfig = agentConfig;
   }
 
-  private formatAgentResponse(response: any): Message {
+  private formatAgentResponse(response: { content: string; strategies?: Strategy[] }): Message {
     let content = response.content;
     
     // If it's a wallet details response, extract only the final message
@@ -122,13 +120,17 @@ export class AilfredAgent {
       // Read existing wallet data if available
       if (typeof window === 'undefined') {
         // Server-side
-        const fs = require('fs');
-        if (fs.existsSync(WALLET_DATA_FILE)) {
-          try {
-            walletDataStr = fs.readFileSync(WALLET_DATA_FILE, "utf8");
-          } catch (error) {
-            console.error("Error reading wallet data:", error);
+        try {
+          const fs = await import('fs');
+          if (fs.existsSync(WALLET_DATA_FILE)) {
+            try {
+              walletDataStr = fs.readFileSync(WALLET_DATA_FILE, "utf8");
+            } catch (error) {
+              console.error("Error reading wallet data:", error);
+            }
           }
+        } catch (error) {
+          console.error("Error importing fs module:", error);
         }
       } else {
         // Client-side
@@ -171,9 +173,13 @@ export class AilfredAgent {
       // Save wallet data
       if (typeof window === 'undefined') {
         // Server-side
-        const fs = require('fs');
-        const exportedWallet = await walletProvider.exportWallet();
-        fs.writeFileSync(WALLET_DATA_FILE, JSON.stringify(exportedWallet));
+        try {
+          const fs = await import('fs');
+          const exportedWallet = await walletProvider.exportWallet();
+          fs.writeFileSync(WALLET_DATA_FILE, JSON.stringify(exportedWallet));
+        } catch (error) {
+          console.error("Error saving wallet data:", error);
+        }
       } else {
         // Client-side
         try {
@@ -285,13 +291,10 @@ export class AilfredAgent {
         }]}
       );
 
-      let toolOutputs = '';
       let agentResponse = '';
       
       for await (const chunk of stream) {
-        if ("tools" in chunk && chunk.tools.messages?.[0]?.content) {
-          toolOutputs += chunk.tools.messages[0].content;
-        } else if ("agent" in chunk && chunk.agent.messages?.[0]?.content) {
+        if ("agent" in chunk && chunk.agent.messages?.[0]?.content) {
           agentResponse = chunk.agent.messages[0].content;
         }
       }

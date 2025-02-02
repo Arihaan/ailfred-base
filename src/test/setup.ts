@@ -2,13 +2,39 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { BaseMessage, AIMessage } from '@langchain/core/messages';
+import { ChatResult } from '@langchain/core/outputs';
+import { cleanup } from '@testing-library/react';
+
+// Mock window.matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
+// Runs a cleanup after each test case
+afterEach(() => {
+  cleanup();
+});
 
 // Mock LLM for testing
 class MockChatModel extends BaseChatModel {
-  async _generate(messages: BaseMessage[]): Promise<any> {
+  async _generate(
+    messages: BaseMessage[]
+  ): Promise<ChatResult> {
     // Return predefined responses based on the input
     const lastMessage = messages[messages.length - 1].content;
-    if (typeof lastMessage !== 'string') return { generations: [] };
+    if (typeof lastMessage !== 'string') {
+      return { generations: [{ text: '', message: new AIMessage('') }] };
+    }
 
     let response = '';
     if (lastMessage.toLowerCase().includes('wallet balance')) {
@@ -20,7 +46,10 @@ class MockChatModel extends BaseChatModel {
     }
 
     return {
-      generations: [[new AIMessage(response)]],
+      generations: [{
+        text: response,
+        message: new AIMessage(response)
+      }]
     };
   }
 

@@ -1,0 +1,21 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "@typescript-eslint/no-unused-vars": ["error", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_",
+      "ignoreRestSiblings": true
+    }]
+  },
+  "overrides": [
+    {
+      "files": ["src/test/**/*.ts", "src/test/**/*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": ["error", {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_"
+        }]
+      }
+    }
+  ]
+} 

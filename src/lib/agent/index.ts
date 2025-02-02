@@ -21,43 +21,11 @@ import type {
   UserPortfolio,
   ExtendedCdpWalletProvider 
 } from "./types";
-import { ReadContractParameters, ReadContractReturnType } from "viem";
-import { z } from "zod";
-import { DynamicStructuredTool } from "@langchain/core/tools";
-import { BaseLanguageModel } from '@langchain/core/language_models/base';
-import { RunnableSequence } from '@langchain/core/runnables';
 
 // Configure a file to persist the agent's CDP MPC Wallet Data
 const WALLET_DATA_FILE = "wallet_data.txt";
 
-interface WalletProvider {
-  balance: (token: string) => Promise<bigint>;
-  getAddress: () => string;
-  readContract: (params: {
-    address: string;
-    abi: any[];
-    functionName: string;
-    args: any[];
-  }) => Promise<any>;
-  invokeContract: (params: {
-    contractAddress: string;
-    method: string;
-    args: any;
-    amount: number;
-    assetId: string;
-  }) => Promise<{ wait: () => Promise<void> }>;
-  networkId: string;
-}
-
-interface AgentConfig {
-  callbacks?: {
-    handleLLMStart?: () => Promise<void>;
-    handleLLMEnd?: () => Promise<void>;
-    handleLLMError?: (err: Error) => Promise<void>;
-  }[];
-}
-
-interface AgentCallbacks {
+interface LLMCallbacks {
   handleLLMStart: () => Promise<void>;
   handleLLMEnd: () => Promise<void>;
   handleLLMError: (err: Error) => Promise<void>;
@@ -288,7 +256,7 @@ export class AilfredAgent {
           handleLLMStart: async () => {},
           handleLLMEnd: async () => {},
           handleLLMError: async (err: Error) => console.error('LLM Error:', err)
-        }]}
+        }] as LLMCallbacks[]}
       );
 
       let agentResponse = '';
@@ -298,6 +266,9 @@ export class AilfredAgent {
           agentResponse = chunk.agent.messages[0].content;
         }
       }
+
+      // Extract strategies based on risk level mentioned in content
+      const strategies = this.extractStrategies(agentResponse);
 
       // For balance-only queries, append formatted balance info
       const lowercaseContent = content.toLowerCase();
@@ -338,18 +309,17 @@ export class AilfredAgent {
           }) as bigint;
           const wethBalanceFormatted = Number(wethBalance) / 1e18;
 
-          // Always create our own response for balance queries to ensure ETH is included
-          const finalResponse = `Very good, sire. Here are your current balances:
+          const balanceResponse = `Very good, sire. Here are your current balances:
 - ETH: ${ethBalanceInEth.toFixed(6)} ETH
 - USDC: ${usdcBalanceFormatted.toFixed(6)} USDC
 - WETH: ${wethBalanceFormatted.toFixed(6)} WETH`;
 
           return {
             role: 'assistant',
-            content: finalResponse,
+            content: balanceResponse,
             timestamp: Date.now(),
-            strategies: this.extractStrategies(finalResponse),
-            portfolio: await this.extractPortfolio(finalResponse)
+            strategies,
+            portfolio: await this.extractPortfolio()
           };
         } catch (error) {
           console.error("Error fetching balances:", error);
@@ -527,19 +497,19 @@ Would you like me to help you get started with AAVE lending? I can assist you in
     };
   }
 
-  private extractStrategies(content: string): Strategy[] | undefined {
+  private extractStrategies(_content: string): Strategy[] | undefined {
     // Extract strategies based on risk level mentioned in content
-    if (content.toLowerCase().includes('low risk')) {
+    if (_content.toLowerCase().includes('low risk')) {
       return AILFRED_PERSONALITY.STRATEGY_CATEGORIES.LOW_RISK.strategies;
-    } else if (content.toLowerCase().includes('medium risk')) {
+    } else if (_content.toLowerCase().includes('medium risk')) {
       return AILFRED_PERSONALITY.STRATEGY_CATEGORIES.MEDIUM_RISK.strategies;
-    } else if (content.toLowerCase().includes('high risk')) {
+    } else if (_content.toLowerCase().includes('high risk')) {
       return AILFRED_PERSONALITY.STRATEGY_CATEGORIES.HIGH_RISK.strategies;
     }
     return undefined;
   }
 
-  private async extractPortfolio(content: string): Promise<UserPortfolio | undefined> {
+  private async extractPortfolio(): Promise<UserPortfolio | undefined> {
     try {
       // Get user's risk profile
       const riskProfile = this.userProfile || {
@@ -583,12 +553,6 @@ Would you like me to help you get started with AAVE lending? I can assist you in
         args: [this.walletProvider.getAddress()]
       });
       const wethBalanceFormatted = Number(wethBalance) / 1e18;
-
-      // Format response string with consistent decimal places
-      const formattedResponse = `Very good, sire. Here are your current balances:
-- ETH: ${ethBalanceInEth.toFixed(6)} ETH
-- USDC: ${usdcBalanceFormatted.toFixed(6)} USDC
-- WETH: ${wethBalanceFormatted.toFixed(6)} WETH`;
 
       const positions = [
         {

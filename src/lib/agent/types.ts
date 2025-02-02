@@ -1,6 +1,4 @@
-import { BigNumberish } from "ethers";
 import { CdpWalletProvider } from "@coinbase/agentkit";
-import { Abi } from "viem";
 
 export interface Network {
   protocolFamily: "evm";

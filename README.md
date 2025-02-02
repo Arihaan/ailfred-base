@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ailfred: Your Personal DeFi Butler on Base
 
-## Getting Started
+![Ailfred Logo](public/assets/banner.jpeg)
 
-First, run the development server:
+Ailfred is a sophisticated AI agent that serves as your personal DeFi butler on the Base network. With a polite, butler-like demeanor, Ailfred helps you navigate the complexities of DeFi with elegance and precision.
+
+## 🎩 Features
+
+- **Natural Conversation**: Interact with DeFi protocols through natural dialogue with your butler
+- **Portfolio Management**: Check balances, view positions, and track investments with simple requests
+- **AAVE Integration**: Supply assets to AAVE lending pools and earn competitive yields (~10% APY)
+- **Investment Guidance**: Receive personalized recommendations based on your risk tolerance
+- **Smart Transaction Handling**: Ailfred handles all technical details and ensures safe transactions
+
+## 🚀 Getting Started
 
 ```bash
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Add your API keys to .env.local
+
+# Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to start interacting with Ailfred.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💬 Example Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- "What's my wallet balance?"
+- "Supply 0.001 ETH to AAVE"
+- "What investment strategies do you recommend?"
+- "Check my AAVE positions"
+- "Request ETH from the faucet"
 
-## Learn More
+## 🔧 Technical Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Frontend**: Next.js, React, TypeScript
+- **AI**: LangChain, OpenAI GPT-3.5
+- **Blockchain**: Ethers.js, Viem
+- **DeFi**: AAVE Protocol, Base Network
+- **Tools**: AgentKit, CDP Wallet Provider
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛡️ Security
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Ailfred prioritizes security by:
+- Never storing private keys
+- Using secure CDP wallet providers
+- Validating all transactions before execution
+- Implementing proper error handling
 
-## Deploy on Vercel
+## 🤝 Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## 🙏 Acknowledgments
+
+- Base Network for the infrastructure
+- AAVE Protocol for lending capabilities
+- Coinbase for AgentKit
+- OpenAI for language model support
